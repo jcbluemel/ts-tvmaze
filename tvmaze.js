@@ -12766,7 +12766,6 @@ function getShowsByTerm(term) {
                 case 0: return [4 /*yield*/, axios_1.default.get("".concat(BASE_TVMAZE_URL, "/search/shows"), { params: { "q": term } })];
                 case 1:
                     shows = _a.sent();
-                    console.log("shows", shows);
                     showDetails = shows.data.map(function (s) {
                         return {
                             id: s.show.id,
@@ -12775,7 +12774,7 @@ function getShowsByTerm(term) {
                             image: s.show.image.medium || NO_IMG_URL
                         };
                     });
-                    console.log(showDetails);
+                    // console.log(showDetails);
                     return [2 /*return*/, showDetails];
             }
         });
@@ -12827,9 +12826,69 @@ $searchForm.on("submit", function (evt) {
 /** Given a show ID, get from API and return (promise) array of episodes:
  *      { id, name, season, number }
  */
-// async function getEpisodesOfShow(id) { }
+function getEpisodesOfShow(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var response, epList;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, axios_1.default.get("".concat(BASE_TVMAZE_URL, "/shows/").concat(id, "/episodes"))];
+                case 1:
+                    response = _a.sent();
+                    epList = response.data.map(function (e) {
+                        return {
+                            id: e.id,
+                            name: e.name,
+                            season: e.season,
+                            number: e.number
+                        };
+                    });
+                    // console.log(epList);
+                    return [2 /*return*/, epList];
+            }
+        });
+    });
+}
 /** Write a clear docstring for this function... */
-// function populateEpisodes(episodes) { }
+function populateEpisodes(episodes) {
+    $episodesArea.empty();
+    for (var _i = 0, episodes_1 = episodes; _i < episodes_1.length; _i++) {
+        var episode = episodes_1[_i];
+        var $episode = $("<li data-episode-id=".concat(episode.id, ">\n        ").concat(episode.name, " (season ").concat(episode.season, ", episode ").concat(episode.number, ")\n      </li>"));
+        $episodesArea.append($episode);
+    }
+}
+/** Handle episode button click: get episodes from API and display.
+ */
+function searchForEpisodesAndDisplay(id) {
+    return __awaiter(this, void 0, void 0, function () {
+        var episodes;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0: return [4 /*yield*/, getEpisodesOfShow(id)];
+                case 1:
+                    episodes = _a.sent();
+                    $episodesArea.show();
+                    populateEpisodes(episodes);
+                    return [2 /*return*/];
+            }
+        });
+    });
+}
+$showsList.on('click', '.Show-getEpisodes', function (evt) {
+    return __awaiter(this, void 0, void 0, function () {
+        var showId;
+        return __generator(this, function (_a) {
+            switch (_a.label) {
+                case 0:
+                    showId = $(evt.target).closest('.Show').attr('data-show-id');
+                    return [4 /*yield*/, searchForEpisodesAndDisplay(showId)];
+                case 1:
+                    _a.sent();
+                    return [2 /*return*/];
+            }
+        });
+    });
+});
 
 
 /***/ })

@@ -8,6 +8,22 @@ const $searchForm = $("#searchForm");
 const BASE_TVMAZE_URL = "http://api.tvmaze.com";
 const NO_IMG_URL = 'https://tinyurl.com/tv-missing';
 
+interface ResponseInterface {
+  config: object;
+  data: ShowAPIDataInterface[];
+  headers: object;
+  request: XMLHttpRequest;
+}
+
+interface ShowAPIDataInterface {
+  score: number;
+  show: {id: number, name: string, summary: string, image: {medium: string}}
+}
+
+interface ShowData {
+  id: number, name: string, summary: string, image: string
+}
+
 /** Given a search term, search for tv shows that match that query.
  *
  *  Returns (promise) array of show objects: [show, show, ...].
@@ -15,19 +31,19 @@ const NO_IMG_URL = 'https://tinyurl.com/tv-missing';
  *    (if no image URL given by API, put in a default image URL)
  */
 
-async function getShowsByTerm(term: string): Promise<object[]> {
-  const shows = await axios.get(
+async function getShowsByTerm(term: string): Promise<ShowData[]> {
+  const shows: ResponseInterface = await axios.get(
     `${BASE_TVMAZE_URL}/search/shows`,
     { params: { "q": term } }
   );
   console.log("shows", shows);
 
-  const showDetails = shows.data.map(s => {
+  const showDetails: ShowData[] = shows.data.map(s => {
     return {
       id: s.show.id,
       name: s.show.name,
       summary: s.show.summary,
-      image: s.show.image || NO_IMG_URL
+      image: s.show.image.medium || NO_IMG_URL
     }
   });
   console.log(showDetails);
@@ -46,8 +62,8 @@ function populateShows(shows) {
       `<div data-show-id="${show.id}" class="Show col-md-12 col-lg-6 mb-4">
          <div class="media">
            <img
-              src="http://static.tvmaze.com/uploads/images/medium_portrait/160/401704.jpg"
-              alt="Bletchly Circle San Francisco"
+              src="${show.image}"
+              alt="${show.name}"
               class="w-25 me-3">
            <div class="media-body">
              <h5 class="text-primary">${show.name}</h5>
